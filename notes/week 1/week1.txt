@@ -1,0 +1,35 @@
+Amazon - made by amazon
+Web - https
+Services - storage, servers, cloud9
+
+Each aws services has an own api. https request to the api can access the services
+Can use aws mgmt console or aws cli (via the aws sdk) to call the apis
+aws sdk platform dependent
+
+Passing my credentials to client
+
+	1. Service-client constructor (in the code of client / hardcoding)
+	2. Environment Variables
+	3. Credentials file (shared - ok for developing not prod)
+	4. If the code is running on docker container hosted in Elastic container service it will
+	   check the ECS credential provider for credentials
+	5. IAM role associated with the instance (Recommended)
+
+Cloud9 instance is run on top of a EC2 instance
+
+AWS is automatically managing the credentials of cloud98. if it is disabled then we cannot run code in cloud9 as there are no credentials. Two ways to fix this
+
+	1. Attach an IAM role to the EC2 instance
+	2. Can use aws configure to create the credential file manually
+	
+
+AWS Serverless Application Model (SAM) is a open source framework to create serverless applications
+
+Serverless Application : 
+	This has a server but server management is done by cloud provider. developer will be more 		looking in to the business logic of the application (FaaS). In FaaS has a event driven 		architecture. Look for the events and handle them.
+
+SAM has 2 components 
+	1. AWS SAM Template Specification - define the serverless application
+	2. AWS SAM Command Line Interface - used to build the application according to the 		                                    specification
+	
+

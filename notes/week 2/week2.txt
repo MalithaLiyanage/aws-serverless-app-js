@@ -1,0 +1,98 @@
+API Driven - The api development is prioritized at the first when building a service. As changes 		     to an API will cause both server and clients to change. Instead of jumping to create 		     both backend and frontend of the application this helps to fully plan the application.
+API Gateway - AWS service that enables to create, publish, maintain, monitor and secure REST, 		      HTTPS and WebSocket APIs.
+	1. WebSocket APIs - user lower levels protocols based on sockets and ports and require the user of IP address and port informaiton. Bidirectional, stateful, Vertically Scalable used in chat applications
+	2. HTTPS API: used to create RESTful APIs with low cost and low latancy. lambda functions can be integrated with them.
+	3. REST API: fast, horizontally scalable
+	
+REST API
+	Resources : an abstract concept used to expose a thing to the client
+	Method: they are the GET. POST .. etc
+	
+GET Method Execution
+	1. Method Request : first step, can apply authorization and data validation in here for the request
+	2. Integration Request : Define the service that the request will be interacted and any data transformation
+	3. Request sent to the backend service
+	4. Integration Response: Encapsulate the backend response with http response. Can configure how that process is done (mapping of http to backend respone) also data transformation can be done
+	5. Method Response: Validating the response
+	
+Models in API gateway created as schemas used to validates the payload in requests and response. This will happen in method level not in resource level (backend)
+
+Mappings in api gateway maps the request / response payload to the data structure as the backend requires. happens in method level. can inject new parameters
+
+Mapping templates in GET requests can be used to sent hardcoded mock data as a response to a api call with queries for example /dragon?dragonName=Atlas. This is configured in Integration response
+
+Models are used to define a JSON schema for the Post requests. If a certain API was called by a POST request and its body doesn't match with the model schema the API gateway rejects the request before going to the backend. This needs to enabled in the Method request.
+
+Request Validation
+
+API Gateway can perform basic validation. This enables you, the API developer, to focus on app-specific deep validation in the backend. You can offload basic validation to API Gateway. For the basic validation, API Gateway verifies either or both of the following conditions:
+
+The required request parameters in the URI, query string, and headers of an incoming request are included and non-blank.
+
+The applicable request payload adheres to the configured JSON schema request model of the method.
+
+Validation is performed in the Method Request and Method Response of the API. You can associate models to validate against at the Method Request or Method Reponse level for each HTTP method. This means that different HTTP methods under a resource can use different models.
+
+Models
+
+A model in API Gateway allows you to define a schema for validating requests and responses.
+
+The model is used to define the format of the incoming data on the Method Request, or the format of the outgoing data on the Method Response. 
+
+Mappings
+
+Mappings are templates written in Velocity Template Language (VTL) that you can apply to the Integration Request or Integration Response of a REST API. The mapping template allows you to transform data, including injecting hardcoded data, or changing the shape of the data before it passes to the backing service or before sending the response to the client. 
+
+ You can access information on the payload of the request and other data in your mapping template by using variables
+ 
+ Stage Variables
+
+Stage variables are name-value pairs that you can define as configuration attributes associated with a deployment stage of a REST API. They act like environment variables and can be used in your API setup and mapping templates.
+
+With deployment stages in API Gateway, you can manage multiple release stages for each API, such as alpha, beta, and production. Using stage variables you can configure an API deployment stage to interact with different backend endpoints. 
+
+You can reference stage variables in Mapping templates through the use of $stageVariables. 
+
+Can create different environments using stage vars such as prod, dev and beta.
+
+API Deployment
+
+Test : https://b7zbqjvuli.execute-api.us-east-2.amazonaws.com/Test
+
+API Authentication : API gateway support athentication and authorization.
+
+API Gateway Access Control : 
+	Our api gateway sould be authenticated to backend using client side ssl certificate
+	CORS - This is where the original url in the browser is different from the actual url called used in the api call. The browser need to authenticate whether this is not malicious (different urls) 
+	For example : www.example.com (browser url) and https://dragons.example.com (api gateway url) . So api gateway should have CORS configured for the browser url to authenticate the requests.
+	AWS WAF - Web application firewall - Can filter requests before the api gateway by IP addresses, http header, body and I string.
+	Usage plans - API key is created in the api gateway. the key is sent to the client and the client uses it in his http header when sending a request. Not much secure as the api key is sent in text to the client. THis is used if the client is given some plans with limited no of requests to access  the api gateway
+	api Resource policy - Are created to control the access by Ip address or IAM user or other users
+	vpc endpoint policy - for interface endpoints where ec2 instances in vpc try access the api gateway
+	
+	
+API Authorization and Authentication (IAM, lambda, cognito)
+
+	Method Request is configured for authorization. Cognito is used to signup and signin users to the application.
+	IAM is used for server to server communication
+	lambda functions needs to be coded
+	
+Amazon Congnito :
+	User Pool Service
+	Identity Pool Service
+	
+Adding Authentication and Authorization to API gateway using cognito user pool
+
+	1. S3 bucket for holding the website file (index.html, callback.html)
+	2. Cognito user fool to hosts users
+	3. Configure it to redirect the authenticated usr to callback.html page
+	4. Configure the hosted ui to sign up / sign in the user
+	5. api is configured to have the authorizer in cognito user pool
+
+http://localhost:8000/callback#id_token=eyJraWQiOiJXalRKQjJuY0FYaDJiMno1U0xVUHJRMzhJVjh0SkdoQmtPak5saTV3TGxnPSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoiX1UzNFZwZkktMGNmQnoyRXczX05VQSIsInN1YiI6IjMwYzIxMmIyLWI5ODMtNGEzYi1hNjJhLWU5NjUzZWIxZDE0OCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0yLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMl9RNjJJYWQxbVoiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOnRydWUsImNvZ25pdG86dXNlcm5hbWUiOiJyaWNreSIsImF1ZCI6IjM4M292ZjgzMzg3NDJyNzFjbjhuYnBwYm5oIiwiZXZlbnRfaWQiOiJiZWNjNjZiZS04ZDMxLTRjNjQtYjBkMi00Y2E3ZGUxODAxMGMiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTYzNzgwNjU1NiwicGhvbmVfbnVtYmVyIjoiKzk0NzY5ODUzNzcwIiwiZXhwIjoxNjM3ODEwMTU2LCJpYXQiOjE2Mzc4MDY1NTYsImp0aSI6IjcwZDcxNDFlLThiMjgtNGE3My1hYTYwLWVhOWY4N2E5Njc0NSIsImVtYWlsIjoibWFsaXRoYXJhbnVAZ21haWwuY29tIn0.nVg0pzlukgao3VjcdcGk7rSRk6_Fdjfedm0PANv968pP7RFf8moFaLuAxPcyOzSY5V4rYmtITBurT5jrBexYWjeTTrLCICSqVoS7oHbuaMV58W5rGwwasjHIvq833Xkdsyg-iWDsCvuieC34CzmUxDDMULZgw4qCXNyYR0JRWr9b2P5ahKz7nprtfJ8eOMfP7_fz1M6v_XfVKBB6ZgM_Co8sZegOJ517etqKxfju2HdhQLJFJq8LlTSqAkpB4Pla4P5HxRlr75dgA_KfrsmlAlJ9liHax5q9a17zK3cHqm8TYcEx1MaUpXR0jvcuV-dajbKRQVpKiOrOJTKzRdXJ_A&access_token=eyJraWQiOiJjNkg3R3ZrSWlnNE5qNTM0UUMreHlMTHl4MnFXYWoyOGUzZklrU1laa3M4PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiIzMGMyMTJiMi1iOTgzLTRhM2ItYTYyYS1lOTY1M2ViMWQxNDgiLCJldmVudF9pZCI6ImJlY2M2NmJlLThkMzEtNGM2NC1iMGQyLTRjYTdkZTE4MDEwYyIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUiLCJhdXRoX3RpbWUiOjE2Mzc4MDY1NTYsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy13ZXN0LTIuYW1hem9uYXdzLmNvbVwvdXMtd2VzdC0yX1E2MklhZDFtWiIsImV4cCI6MTYzNzgxMDE1NiwiaWF0IjoxNjM3ODA2NTU2LCJ2ZXJzaW9uIjoyLCJqdGkiOiIwN2FkOTU3Mi03ODdkLTRjNGUtODI1ZS1lNGE4NjdhOTRiODAiLCJjbGllbnRfaWQiOiIzODNvdmY4MzM4NzQycjcxY244bmJwcGJuaCIsInVzZXJuYW1lIjoicmlja3kifQ.hKvzwP9DjIVJxqXhDDViNOy9uAJJHONKUGOEZYEQmBlo7agkL3Td1Kyuae1jQqtcU11g8S-gD6cU7cE98e4_KhJ6zb2lV7o8rqrAAw0krGUCXim8mg9gC9V1ncnM-6DYlYXbOn7WkE20eFxalHR-seSY7OMfu4bAsXfNLmYkDZTHEEU0eMjPcP4WuVUMBd3gEI4DCkvJZMQgX8BKEaLcp_p7PBej6KPt3iGxF0BSPVjQHb0cB-jQ3YQAwzHuxdf_Wapx1ru6Detk-xorLiMFKHAQ3cqRpeUKGvM2KrCnJE0pFZO8Cg4Qzt1h3qt61-yt0oRokAxFhSc-IelKawFcZQ&expires_in=3600&token_type=Bearer
+
+eyJraWQiOiJXalRKQjJuY0FYaDJiMno1U0xVUHJRMzhJVjh0SkdoQmtPak5saTV3TGxnPSIsImFsZyI6IlJTMjU2In0.eyJhdF9oYXNoIjoiX1UzNFZwZkktMGNmQnoyRXczX05VQSIsInN1YiI6IjMwYzIxMmIyLWI5ODMtNGEzYi1hNjJhLWU5NjUzZWIxZDE0OCIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0yLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMl9RNjJJYWQxbVoiLCJwaG9uZV9udW1iZXJfdmVyaWZpZWQiOnRydWUsImNvZ25pdG86dXNlcm5hbWUiOiJyaWNreSIsImF1ZCI6IjM4M292ZjgzMzg3NDJyNzFjbjhuYnBwYm5oIiwiZXZlbnRfaWQiOiJiZWNjNjZiZS04ZDMxLTRjNjQtYjBkMi00Y2E3ZGUxODAxMGMiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTYzNzgwNjU1NiwicGhvbmVfbnVtYmVyIjoiKzk0NzY5ODUzNzcwIiwiZXhwIjoxNjM3ODEwMTU2LCJpYXQiOjE2Mzc4MDY1NTYsImp0aSI6IjcwZDcxNDFlLThiMjgtNGE3My1hYTYwLWVhOWY4N2E5Njc0NSIsImVtYWlsIjoibWFsaXRoYXJhbnVAZ21haWwuY29tIn0.nVg0pzlukgao3VjcdcGk7rSRk6_Fdjfedm0PANv968pP7RFf8moFaLuAxPcyOzSY5V4rYmtITBurT5jrBexYWjeTTrLCICSqVoS7oHbuaMV58W5rGwwasjHIvq833Xkdsyg-iWDsCvuieC34CzmUxDDMULZgw4qCXNyYR0JRWr9b2P5ahKz7nprtfJ8eOMfP7_fz1M6v_XfVKBB6ZgM_Co8sZegOJ517etqKxfju2HdhQLJFJq8LlTSqAkpB4Pla4P5HxRlr75dgA_KfrsmlAlJ9liHax5q9a17zK3cHqm8TYcEx1MaUpXR0jvcuV-dajbKRQVpKiOrOJTKzRdXJ_A
+
+c11284a125436l1306552t1w269354331733-s3bucket-15nnkkh11ykd2
+	
+

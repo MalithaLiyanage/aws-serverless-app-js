@@ -1,0 +1,9 @@
+aws lambda: compute service. allows to execute only when needed and has the ability to scale. Administrate the resources that require for computing, server and operating system maintenance and logging
+
+Integrate it to REST api
+we have to code the lambda
+Event concurrency and trigger - 
+	Event is a JSON formatted doc containing data for a function to process
+At runtime lambda turn this into an object and pass it to the function. So when the function is invoked the structure and content of the event.
+
+	Concurrency is the number of reqs a function is serving at a given time
